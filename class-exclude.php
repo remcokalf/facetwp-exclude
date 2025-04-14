@@ -1,6 +1,7 @@
 <?php
 
-class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet {
+class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
+{
 
     public $exclude = [];
     public $field_defaults;
@@ -30,6 +31,7 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet {
         add_filter( 'facetwp_filtered_post_ids', [ $this, 'filter_post_ids' ], 11, 2 );
         add_filter( 'facetwp_facet_html', [ $this, 'hide_ghosts' ], 10, 2 );
         add_filter( 'facetwp_facet_render_args', [ $this, 'reverse_counts' ], 10 );
+        add_filter( 'facetwp_facet_orderby', [ $this, 'reverse_orderby' ], 10, 2 );
         add_filter( 'facetwp_facet_display_value', [ $this, 'add_prefix_suffix' ], 10, 2 );
     }
 
@@ -215,6 +217,26 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet {
         }
 
         return $args;
+    }
+
+
+    /**
+     * Reverse orderby
+     */
+    function reverse_orderby( $orderby, $facet ) {
+
+        $reverse_counts = FWP()->helper->facet_is( $facet, 'reverse_counts', 'yes' );
+
+        if ( 'exclude' == $facet['type'] && $reverse_counts ) {
+
+            // Reverse order if "Sort by" is set to "Highest count" and "Reverse counts" is enabled.
+            if ( strpos( $orderby, 'counter DESC' ) !== false ) {
+                $orderby = str_replace( 'counter DESC', 'counter ASC', $orderby );
+            }
+
+        }
+
+        return $orderby;
     }
 
 

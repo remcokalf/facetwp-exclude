@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: FacetWP - 450 - Exclude v080425
+Plugin Name: FacetWP - Exclude
 Description: Exclude facet type
 Version: 0.1
 Author: FacetWP, LLC
@@ -19,5 +19,6 @@ define( 'FACETWP_EXCLUDE_VERSION', '0.1' );
 add_filter( 'facetwp_facet_types', function( $types ) {
     include( dirname( __FILE__ ) . '/class-exclude.php' );
     $types['exclude'] = new FacetWP_Facet_Exclude_Addon();
+
     return $types;
 } );

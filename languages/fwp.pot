@@ -1,0 +1,51 @@
+# Copyright (C) 2025 FacetWP, LLC
+# This file is distributed under the same license as the FacetWP plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: FacetWP - Exclude 0.1\n"
+"Report-Msgid-Bugs-To: https://facetwp.com/help-center/get-support/\n"
+"Last-Translator: Matt Gibbs <hello@facetwp.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-04-14T10:13:14+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: fwp\n"
+
+#. Plugin Name of the plugin
+#: facetwp-exclude.php
+msgid "FacetWP - Exclude"
+msgstr ""
+
+#. Description of the plugin
+#: facetwp-exclude.php
+msgid "Exclude facet type"
+msgstr ""
+
+#. Author of the plugin
+#: facetwp-exclude.php
+msgid "FacetWP, LLC"
+msgstr ""
+
+#. Author URI of the plugin
+#: facetwp-exclude.php
+msgid "https://facetwp.com/"
+msgstr ""
+
+#: class-exclude.php:9
+msgid "Exclude"
+msgstr ""
+
+#: class-exclude.php:284
+msgid "Reverse counts"
+msgstr ""
+
+#: class-exclude.php:288
+msgid "Prefix"
+msgstr ""
+
+#: class-exclude.php:292
+msgid "Suffix"
+msgstr ""

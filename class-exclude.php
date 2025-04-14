@@ -1,20 +1,36 @@
 <?php
 
-class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
-{
+class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet {
 
     public $exclude = [];
     public $field_defaults;
 
     function __construct() {
         $this->label = __( 'Exclude', 'fwp' );
-        $this->fields = [ 'ui_type', 'label_any', 'parent_term', 'modifiers', 'hierarchical', 'show_expanded', 'multiple', 'ghosts', 'orderby', 'count', 'soft_limit' ];
+        $this->fields = [
+            'ui_type',
+            'label_any',
+            'parent_term',
+            'modifiers',
+            'hierarchical',
+            'show_expanded',
+            'multiple',
+            'ghosts',
+            'orderby',
+            'count',
+            'soft_limit',
+            'reverse_counts',
+            'prefix',
+            'suffix'
+        ];
         $this->field_defaults = [
             'ui_type' => 'checkboxes'
         ];
 
         add_filter( 'facetwp_filtered_post_ids', [ $this, 'filter_post_ids' ], 11, 2 );
         add_filter( 'facetwp_facet_html', [ $this, 'hide_ghosts' ], 10, 2 );
+        add_filter( 'facetwp_facet_render_args', [ $this, 'reverse_counts' ], 10 );
+        add_filter( 'facetwp_facet_display_value', [ $this, 'add_prefix_suffix' ], 10, 2 );
     }
 
 
@@ -78,8 +94,7 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
                 }
 
                 $output = $tmp;
-            }
-            else {
+            } else {
                 // Make the array key equal to the facet_value (for easy lookup)
                 foreach ( $output as $row ) {
                     $tmp[ $row['facet_value'] . ' ' ] = $row; // Force a string array key
@@ -89,8 +104,8 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
 
                 foreach ( $ghost_output as $row ) {
                     $facet_value = $row['facet_value'];
-                    if ( ! isset( $output[ "$facet_value " ] ) ) {
-                        $output[ "$facet_value " ] = $row;
+                    if ( ! isset( $output["$facet_value "] ) ) {
+                        $output["$facet_value "] = $row;
                     }
                 }
             }
@@ -120,12 +135,12 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
         $facet = $params['facet'];
         $selected_values = $params['selected_values'];
 
-        if ( !empty( $selected_values ) ) {
+        if ( ! empty( $selected_values ) ) {
 
             $sql = $wpdb->prepare( "SELECT DISTINCT post_id
                 FROM {$wpdb->prefix}facetwp_index
                 WHERE facet_name = %s",
-                $facet[ 'name' ]
+                $facet['name']
             );
 
             $selected_values = implode( "','", $selected_values );
@@ -142,7 +157,7 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
      * */
     function filter_post_ids( $post_ids, $class ) {
 
-        if ( !empty( $this->exclude ) ) {
+        if ( ! empty( $this->exclude ) ) {
             $post_ids = array_diff( $post_ids, $this->exclude );
         }
 
@@ -157,14 +172,74 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
     function hide_ghosts( $output, $params ) {
 
         if ( 'exclude' == $params['facet']['type'] ) {
-            if( $params['facet']['ghosts'] == "no" ) {
+            if ( $params['facet']['ghosts'] == "no" ) {
                 $css = '<style>[data-type="exclude"] .disabled { display: none; }</style>';
                 $output = $css . $output;
             };
-
         }
+
         return $output;
 
+    }
+
+
+    /**
+     * Reverse counts
+     */
+    function reverse_counts( $args ) {
+
+        $facet = $args['facet'];
+        $reverse_counts = FWP()->helper->facet_is( $facet, 'reverse_counts', 'yes' );
+
+        if ( 'exclude' == $facet['type'] && $reverse_counts ) {
+
+            $found_posts = FWP()->facet->query->found_posts;
+            $selected = $args['selected_values'];
+
+            $args['values'] = array_map( function( $value ) use ( $found_posts, $selected ) {
+
+                $reverse_count = $found_posts - $value['counter'];
+
+                // Show reverse count if no selections, or if choice is not selected and not "0" (to keep Ghosts/disappear working)
+                if ( $selected === [] ) {
+                    $value['counter'] = $reverse_count;
+                } else {
+                    if ( $value['counter'] !== "0" || in_array( $value['facet_value'], $selected ) ) {
+                        $value['counter'] = $reverse_count;
+                    }
+                }
+
+                return $value;
+
+            }, $args['values'] );
+        }
+
+        return $args;
+    }
+
+
+    /**
+     * Add prefix/suffix
+     */
+    function add_prefix_suffix( $label, $params ) {
+
+        $facet = $params['facet'];
+
+        if ( 'exclude' == $facet['type'] ) {
+
+            $prefix = facetwp_i18n( $facet['prefix'] );
+            $suffix = facetwp_i18n( $facet['suffix'] );
+
+            if ( ! empty( $prefix ) ) {
+                $label = $prefix . $label;
+            }
+
+            if ( ! empty( $suffix ) ) {
+                $label = $label . $suffix;
+            }
+        }
+
+        return $label;
     }
 
 
@@ -194,6 +269,30 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
      */
     function settings_js( $params ) {
         $expand = empty( $params['facet']['show_expanded'] ) ? 'no' : $params['facet']['show_expanded'];
+
         return [ 'show_expanded' => $expand ];
     }
+
+
+    /**
+     * Register settings
+     */
+    function register_fields() {
+        return [
+            'reverse_counts' => [
+                'type'  => 'toggle',
+                'label' => __( 'Reverse counts', 'fwp' ),
+                'notes' => 'Make facet choice counts represent the number or posts <em>without</em> that choice.'
+            ],
+            'prefix'         => [
+                'label' => __( 'Prefix', 'fwp' ),
+                'notes' => 'Text that appears before each facet choice label.<br>E.g. "no&nbsp;[...]".',
+            ],
+            'suffix'         => [
+                'label' => __( 'Suffix', 'fwp' ),
+                'notes' => 'Text that appears after each facet choice label.<br>E.g. "[...]-free".',
+            ]
+        ];
+    }
+
 }

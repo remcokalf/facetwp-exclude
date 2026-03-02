@@ -7,7 +7,7 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
     public $field_defaults;
 
     function __construct() {
-        $this->label = __( 'Exclude', 'fwp' );
+        $this->label = __( 'Exclude', 'facetwp-exclude' );
         $this->fields = [
             'ui_type',
             'label_any',
@@ -303,15 +303,15 @@ class FacetWP_Facet_Exclude_Addon extends FacetWP_Facet
         return [
             'reverse_counts' => [
                 'type'  => 'toggle',
-                'label' => __( 'Reverse counts', 'fwp' ),
+                'label' => __( 'Reverse counts', 'facetwp-exclude' ),
                 'notes' => 'Make facet choice counts represent the number or posts <em>without</em> that choice.'
             ],
             'prefix'         => [
-                'label' => __( 'Prefix', 'fwp' ),
+                'label' => __( 'Prefix', 'facetwp-exclude' ),
                 'notes' => 'Text that appears before each facet choice label.<br>E.g. "no&nbsp;[...]".',
             ],
             'suffix'         => [
-                'label' => __( 'Suffix', 'fwp' ),
+                'label' => __( 'Suffix', 'facetwp-exclude' ),
                 'notes' => 'Text that appears after each facet choice label.<br>E.g. "[...]-free".',
             ]
         ];

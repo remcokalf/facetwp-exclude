@@ -6,6 +6,8 @@ Version: 0.1
 Author: FacetWP, LLC
 Author URI: https://facetwp.com/
 GitHub URI: facetwp/facetwp-exclude
+Text Domain: facetwp-exclude
+Domain Path: /languages
 */
 
 defined( 'ABSPATH' ) or exit;
